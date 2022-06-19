@@ -283,6 +283,9 @@ def top2gating(logits: Tensor,
                                            Tensor,
                                            Tensor]:
     """Implements Top2Gating on logits."""
+
+    drop_tokens = False
+
     # everything is in fp32 in this function
     gates = F.softmax(logits, dim=1)
 
@@ -311,6 +314,12 @@ def top2gating(logits: Tensor,
 
     # gating decisions
     exp_counts = torch.sum(mask1, dim=0).detach().to('cpu')
+
+    # if we don't want to drop any tokens
+    if not drop_tokens:
+        new_capacity = torch.max(exp_counts).to(logits.device)
+        dist.all_reduce(new_capacity, op=dist.ReduceOp.MAX, group=dist.get_world_group())
+        capacity = torch.min(new_capacity, capacity * 8)
 
     # Compute l_aux
     me = torch.mean(gates, dim=0)

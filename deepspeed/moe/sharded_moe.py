@@ -17,6 +17,7 @@ from deepspeed.utils import logger, log_dist
 from typing import Callable, Dict, TYPE_CHECKING, Any, Optional, Tuple, Union, cast
 
 import time
+import os
 from time import perf_counter
 import torch
 from torch import Tensor
@@ -319,7 +320,8 @@ def top2gating(logits: Tensor,
     if not drop_tokens:
         new_capacity = torch.max(exp_counts).to(logits.device)
         dist.all_reduce(new_capacity, op=dist.ReduceOp.MAX, group=dist.get_world_group())
-        capacity = torch.min(new_capacity, capacity * 8)
+        max_capacity_times = int(os.environ.get('FAIRSEQ_MCT', 8))
+        capacity = torch.minimum(new_capacity, capacity * max_capacity_times)
 
     # Compute l_aux
     me = torch.mean(gates, dim=0)

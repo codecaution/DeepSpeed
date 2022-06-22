@@ -21,7 +21,7 @@ import os
 from time import perf_counter
 import torch
 from torch import Tensor
-import deepspeed.comm as dist
+import torch.distributed as dist
 from torch.nn import Module, ModuleList
 import torch.nn.functional as F
 
@@ -81,7 +81,7 @@ def gumbel_rsample(shape: Tuple, device: torch.device) -> Tensor:
     return gumbel(shape)
 
 
-import deepspeed.comm as dist
+import torch.distributed as dist
 
 # einsum dimensions: (g)roup, (s)equence, (e)xpert, (m)odel, (c)apacity
 # See https://arxiv.org/pdf/2006.16668.pdf for details.

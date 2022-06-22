@@ -215,7 +215,7 @@ def top1gating(logits: Tensor,
     # if we don't want to drop any tokens
     if not drop_tokens:
         new_capacity = torch.max(exp_counts).to(logits.device)
-        torch.distributed.all_reduce(new_capacity, op=dist.ReduceOp.MAX)
+        torch.distributed.all_reduce(new_capacity, op=torch.distributed.ReduceOp.MAX)
         capacity = new_capacity
 
     # Compute l_aux
@@ -319,7 +319,7 @@ def top2gating(logits: Tensor,
     # if we don't want to drop any tokens
     if not drop_tokens:
         new_capacity = torch.max(exp_counts).to(logits.device)
-        torch.distributed.all_reduce(new_capacity, op=dist.ReduceOp.MAX)
+        torch.distributed.all_reduce(new_capacity, op=torch.distributed.ReduceOp.MAX)
         max_capacity_times = int(os.environ.get('FAIRSEQ_MCT', 8))
         capacity = torch.minimum(new_capacity, capacity * max_capacity_times)
 
